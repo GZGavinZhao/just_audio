@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:just_audio_platform_interface/just_audio_platform_interface.dart';
+import 'package:just_audio_vlc/just_audio_vlc.dart';
 import 'package:meta/meta.dart' show experimental;
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
@@ -1245,26 +1246,61 @@ class AudioPlayer {
         }
       }
       if (_disposed) return _platform;
+
+			// WARNING: it's a temporary solution to test out just_audio on Linux
+			// Reference https://github.com/flutter/flutter/issues/52267
+			//
       // During initialisation, we must only use this platform reference in case
       // _platform is updated again during initialisation.
-      final platform = active
-          ? await (_nativePlatform =
-              JustAudioPlatform.instance.init(InitRequest(
-              id: _id,
-              audioLoadConfiguration: _audioLoadConfiguration?._toMessage(),
-              androidAudioEffects: (_isAndroid() || _isUnitTest())
-                  ? _audioPipeline.androidAudioEffects
-                      .map((audioEffect) => audioEffect._toMessage())
-                      .toList()
-                  : [],
-              darwinAudioEffects: (_isDarwin() || _isUnitTest())
-                  ? _audioPipeline.darwinAudioEffects
-                      .map((audioEffect) => audioEffect._toMessage())
-                      .toList()
-                  : [],
-            )))
-          : (_idlePlatform =
-              _IdleAudioPlayer(id: _id, sequenceStream: sequenceStream));
+			late final AudioPlayerPlatform platform;
+      // var platform = active
+      //     ? await (_nativePlatform = Platform.isLinux
+      //         ? JustAudioPlatform.instance.init(InitRequest(
+      //             id: _id,
+      //           ))
+      //         : JustAudioPlatform.instance.init(InitRequest(
+      //             id: _id,
+      //             audioLoadConfiguration: _audioLoadConfiguration?._toMessage(),
+      //             androidAudioEffects: (_isAndroid() || _isUnitTest())
+      //                 ? _audioPipeline.androidAudioEffects
+      //                     .map((audioEffect) => audioEffect._toMessage())
+      //                     .toList()
+      //                 : [],
+      //             darwinAudioEffects: (_isDarwin() || _isUnitTest())
+      //                 ? _audioPipeline.darwinAudioEffects
+      //                     .map((audioEffect) => audioEffect._toMessage())
+      //                     .toList()
+      //                 : [],
+      //           )))
+      //     : (_idlePlatform =
+      //         _IdleAudioPlayer(id: _id, sequenceStream: sequenceStream));
+      if (active) {
+        if (Platform.isLinux) {
+          JustAudioPlatform.instance = JustAudioVlcPlugin();
+          platform =
+              await JustAudioPlatform.instance.init(InitRequest(id: _id));
+        } else {
+          platform = await JustAudioPlatform.instance.init(InitRequest(
+            id: _id,
+            audioLoadConfiguration: _audioLoadConfiguration?._toMessage(),
+            androidAudioEffects: (_isAndroid() || _isUnitTest())
+                ? _audioPipeline.androidAudioEffects
+                    .map((audioEffect) => audioEffect._toMessage())
+                    .toList()
+                : [],
+            darwinAudioEffects: (_isDarwin() || _isUnitTest())
+                ? _audioPipeline.darwinAudioEffects
+                    .map((audioEffect) => audioEffect._toMessage())
+                    .toList()
+                : [],
+          ));
+        }
+      } else {
+        platform = (_idlePlatform =
+            _IdleAudioPlayer(id: _id, sequenceStream: sequenceStream));
+      }
+			// WARNING SECTION ABOVE
+
       if (checkInterruption()) return platform;
 
       _platformValue = platform;

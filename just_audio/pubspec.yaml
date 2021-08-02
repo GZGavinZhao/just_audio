@@ -14,6 +14,13 @@ dependencies:
   just_audio_web: ^0.4.1
   # just_audio_web:
   #   path: ../just_audio_web
+
+  # WARNING: temporary solution
+  # See https://github.com/flutter/flutter/issues/52267
+  just_audio_vlc:
+    path: ../just_audio_vlc
+  # WARNING SECTION ABOVE
+
   audio_session: ^0.1.5
   rxdart: '>=0.26.0 <0.28.0'
   path: ^1.8.0

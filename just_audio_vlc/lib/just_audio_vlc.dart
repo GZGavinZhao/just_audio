@@ -25,7 +25,7 @@ class JustAudioVlcPlugin extends JustAudioPlatform {
           code: "error",
           message: "Platform player ${request.id} already exists");
     }
-    final player = VlcAudioPlayer(request.id);
+    final player = VlcAudioPlayer(request.id)..init();
     players[request.id] = player;
     return player;
   }

@@ -27,3 +27,5 @@ flutter:
 dependency_overrides:
   audio_session:
     git: https://github.com/ryanheise/audio_session.git
+  just_audio:
+    path: ../../just_audio

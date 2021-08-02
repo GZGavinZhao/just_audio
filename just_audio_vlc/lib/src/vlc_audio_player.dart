@@ -1,4 +1,5 @@
 import 'dart:developer' as dev;
+import 'dart:math';
 
 import 'package:just_audio_platform_interface/just_audio_platform_interface.dart';
 import 'package:dart_vlc/dart_vlc.dart';
@@ -10,8 +11,9 @@ class VlcAudioPlayer extends AudioPlayerPlatform {
 
   bool _isPlaying = false;
 
+	// TODO: just_audio uses uuid for id, but dart_vlc uses int!!!
   void init() {
-    player = Player(id: int.parse(id));
+    player = Player(id: Random().nextInt(1000));
   }
 
   @override
